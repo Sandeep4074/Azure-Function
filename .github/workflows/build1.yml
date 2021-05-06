@@ -36,7 +36,7 @@ jobs:
       with:
        connection-string: DefaultEndpointsProtocol=https;AccountName=proddsgstorageac;AccountKey=qcbt5uIoOS18gVMb5KkLEufwSwSvQcxymM/lZGvHnPewla1XcfV9fFaxyVMOL7ykEe3zhK6PfzgwK3w9b9G1AQ==;EndpointSuffix=core.windows.net
        name: artifact
-       path: D:\a\Azure-Function\Azure-Function\AzureFunctionSample\bin\Release\net461\publish\
+       path: D:\a\Azure-Function\Azure-Function\AzureFunctionSample\
        container: github-action-artifacts
        cleanup:  true
      
