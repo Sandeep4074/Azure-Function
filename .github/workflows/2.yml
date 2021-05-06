@@ -1,22 +1,19 @@
-name: .NET
+name: Deploy DotNet project to function app with a Windows environment
 
-#on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+on:
+  [push]
+
 env:
-  AZURE_FUNCTIONAPP_NAME: your-app-name  # set this to your application's name
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'    # set this to the path to your web app project, defaults to the repository root
+  AZURE_FUNCTIONAPP_NAME: dsghrinterface  # set this to your application's name
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'Azure-Function/AzureFunctionSample/'    # set this to the path to your web app project, defaults to the repository root
   DOTNET_VERSION: '2.2.402'              # set this to the dotnet version to use
-  
+
 jobs:
   build-and-deploy:
     runs-on: windows-latest
-    environment: dev
     steps:
     - name: 'Checkout GitHub Action'
-      uses: actions/checkout@master
+      uses: actions/checkout@main
 
     - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
       uses: actions/setup-dotnet@v1
@@ -29,3 +26,10 @@ jobs:
         pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
         dotnet build --configuration Release --output ./output
         popd
+    - name: 'Run Azure Functions Action'
+      uses: Azure/functions-action@v1
+      id: fa
+      with:
+        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+        package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
+        publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
