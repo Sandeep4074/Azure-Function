@@ -32,8 +32,8 @@ jobs:
   # - name: Create the package
   #   run: dotnet pack --configuration Release AzureFunctionSample
 
-	- name: Create build pack zip
-	  run: dotnet build /p:DeployOnBuild=true /p:DeployTarget=Package;CreatePackageOnPublish=true
+    - name: Create build pack zip
+      run: dotnet build /p:DeployOnBuild=true /p:DeployTarget=Package;CreatePackageOnPublish=true
 
 #    - name: Upload a Build Artifact to Azure Blob Storage
 #      uses: fixpoint/azblob-upload-artifact@v4.2
