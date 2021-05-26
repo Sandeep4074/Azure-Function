@@ -31,8 +31,12 @@ jobs:
       run: dotnet test --no-restore --verbosity normal
     - name: Create the package
       run: dotnet pack --configuration Release AzureFunctionSample
+    - name: List dir
+      working-directory: ${{env.working-directory}}
+      run: tree .bin/Release/netcoreapp3.1 &&  dir .bin/Release/netcoreapp3.1
+      shell: powershell
     - name: Upload a Build Artifact to Azure Blob Storage
-      uses: fixpoint/azblob-upload-artifact@v4.2
+  #    uses: fixpoint/azblob-upload-artifact@v4.2
       with:
        connection-string: DefaultEndpointsProtocol=https;AccountName=proddsgstorageac;AccountKey=qcbt5uIoOS18gVMb5KkLEufwSwSvQcxymM/lZGvHnPewla1XcfV9fFaxyVMOL7ykEe3zhK6PfzgwK3w9b9G1AQ==;EndpointSuffix=core.windows.net
        name: artifact
