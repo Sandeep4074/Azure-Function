@@ -1,7 +1,7 @@
 name: Create ZIP artifact
 
-on:
-  push:
+#on:
+# push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
