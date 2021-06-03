@@ -1,7 +1,25 @@
 on: [push]
 name: Azure FunctionApp ARM
 jobs:
-  build-and-deploy:
+  Validation:
+    name: Validations
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: ARM Template Toolkit (ARM TTK) Validation    
+        id: armttkvalidation
+        uses: aliencube/arm-ttk-actions@v0.3
+        with:
+          path: ./
+          
+      - name: Test result
+        shell: bash
+        continue-on-error: true
+        run: |
+          echo "${{ toJSON(fromJSON(steps.armttkvalidation.outputs.results)) }}"
+  Deploy:
     runs-on: windows-latest
     steps:
 
