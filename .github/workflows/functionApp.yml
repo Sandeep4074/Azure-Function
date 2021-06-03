@@ -21,7 +21,4 @@ jobs:
         resourceGroupName: ${{ secrets.AZURE_RG }}
         template: ./azuredeploy.json
         #parameters: storageAccountType=Standard_LRS
-    - name: List dir - workspace
-      run: (Get-AzResourceGroupDeploymentOperation -ResourceGroupName ExampleGroup -DeploymentName ExampleDeploy).Properties | Where-Object ProvisioningState -eq Failed
-      shell: pwsh
       
