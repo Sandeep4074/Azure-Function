@@ -39,5 +39,5 @@ jobs:
         app-name: 'fnapp6rocerxneeuwk'
         slot-name: 'production'
         package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_816b9135fab649e8952e5dbe27fc7301 }}
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_d50896832c4a427ab0e5c5daa34ad993 }}
   
