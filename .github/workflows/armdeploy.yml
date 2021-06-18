@@ -3,6 +3,8 @@ name: Azure ARM Deploy
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      working-directory: ./AssociateSync/Functions
     steps:
 
       # Checkout code
@@ -20,9 +22,10 @@ jobs:
       with:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
         resourceGroupName: ${{ secrets.AZURE_RG }}
-        path: ${GITHUB_WORKSPACE}/AssociateSync/Functions/
+        working-directory: ${{env.working-directory}}
+        #path: ${GITHUB_WORKSPACE}/AssociateSync/Functions/
         template: ./azuredeploy.json
-       #parameters: storageAccountType=Standard_LRS
+        #parameters: storageAccountType=Standard_LRS
 
       # output containerName variable from template
     - run: echo ${{ steps.deploy.outputs.containerName }}
