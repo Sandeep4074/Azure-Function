@@ -38,6 +38,6 @@ jobs:
       with:
         app-name: 'DSG-HR-FunApp'
         slot-name: 'production'
-        package: '${{ GITHUB_WORKSPACE }}${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
+        package: '${{GITHUB_WORKSPACE}}${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_4dc646fdcbc34b04b5dc81950d873e7e }}
   
