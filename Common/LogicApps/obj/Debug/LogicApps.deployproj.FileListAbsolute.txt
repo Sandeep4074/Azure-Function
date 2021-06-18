@@ -1,0 +1,1 @@
+C:\Git\Dev\HR\dsg-tech\ES-HR-Interfaces\Common\LogicApps\obj\Debug\LogicApps.deployproj.CoreCompileInputs.cache

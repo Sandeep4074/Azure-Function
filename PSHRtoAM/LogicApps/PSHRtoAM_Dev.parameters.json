@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workflows_PSHRtoAM_name": {
+      "value": "PSHRtoAM-Dev",
+      "type": "String"
+    },
+    "integrationAccounts_BizTalktoAzureMigration_externalid": {
+      "Value": "/subscriptions/98f767bd-d0d7-4699-acab-0dd799ce240d/resourceGroups/ES-HR-Logic-Apps/providers/Microsoft.Logic/integrationAccounts/BizTalktoAzureMigration",
+      "type": "String"
+    },
+    "connections_azureloganalyticsdatacollector_externalid": {
+      "defaultValue": "/subscriptions/98f767bd-d0d7-4699-acab-0dd799ce240d/resourceGroups/ES-HR-Logic-Apps/providers/Microsoft.Web/connections/azureloganalyticsdatacollector",
+      "type": "String"
+    },
+    "connections_sql_4_externalid": {
+      "defaultValue": "/subscriptions/98f767bd-d0d7-4699-acab-0dd799ce240d/resourceGroups/ES-HR-Logic-Apps/providers/Microsoft.Web/connections/sql-4",
+      "type": "String"
+    }
+  }
+}

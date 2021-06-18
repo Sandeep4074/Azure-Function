@@ -1,0 +1,2 @@
+C:\Git\Dev\HR\PSHRtoAM\LogicApps\obj\Debug\LogicApps.deployproj.CoreCompileInputs.cache
+C:\Git\Dev\HR\dsg-tech\ES-HR-Interfaces\PSHRtoAM\LogicApps\obj\Debug\LogicApps.deployproj.CoreCompileInputs.cache

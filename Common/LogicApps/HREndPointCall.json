@@ -1,0 +1,109 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workflows_HREndPointCall_name": {
+      "defaultValue": "HREndPointCall",
+      "type": "String"
+    },
+    "connections_webcontents_5_externalid": {
+      "defaultValue": "/subscriptions/98f767bd-d0d7-4699-acab-0dd799ce240d/resourceGroups/ES-HR-Apps-Dev/providers/Microsoft.Web/connections/webcontents-5",
+      "type": "String"
+    },
+    "EndPointURL": {
+      "defaultValue": "https://myhruat.dcsg.com/PSIGW/PS81ListeningConnector",
+      "type": "String"
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2017-07-01",
+      "name": "[parameters('workflows_HREndPointCall_name')]",
+      "location": "eastus",
+      "tags": {
+        "displayName": "LogicApp"
+      },
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "$EndPointURL": {
+              "defaultValue": "",
+              "type": "String"
+            },
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            }
+          },
+          "triggers": {
+            "manual": {
+              "type": "Request",
+              "kind": "Http",
+              "inputs": {
+                "schema": {}
+              }
+            }
+          },
+          "actions": {
+            "Invoke_an_HTTP_request": {
+              "runAfter": {},
+              "type": "ApiConnection",
+              "inputs": {
+                "body": {
+                  "body": "@{base64(triggerBody())}",
+                  "method": "POST",
+                  "url": "@parameters('$EndPointURL')"
+                },
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['webcontents_1']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "/codeless/InvokeHttp",
+                "retryPolicy": {
+                  "count": 3,
+                  "interval": "PT30S",
+                  "type": "fixed"
+                }
+              }
+            },
+            "Response": {
+              "runAfter": {
+                "Invoke_an_HTTP_request": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Response",
+              "kind": "Http",
+              "inputs": {
+                "body": "@body('Invoke_an_HTTP_request')",
+                "statusCode": 200
+              }
+            }
+          },
+          "outputs": {}
+        },
+        "parameters": {
+          "$EndPointURL": {
+            "value": "[parameters('EndPointURL')]"
+          },
+          "$connections": {
+            "value": {
+              "webcontents_1": {
+                "connectionId": "[parameters('connections_webcontents_5_externalid')]",
+                "connectionName": "webcontents-5",
+                "id": "/subscriptions/98f767bd-d0d7-4699-acab-0dd799ce240d/providers/Microsoft.Web/locations/eastus/managedApis/webcontents"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workflows_HREndPointCall_name": {
+      "value": "HREndPointCall"
+    },
+    "connections_webcontents_5_externalid": {
+      "value": "/subscriptions/98f767bd-d0d7-4699-acab-0dd799ce240d/resourceGroups/ES-HR-Apps-Dev/providers/Microsoft.Web/connections/webcontents-5"
+    },
+    "EndPointURL": {
+      "value": "https://myhruat.dcsg.com/PSIGW/PS81ListeningConnector"
+    }
+  }
+}

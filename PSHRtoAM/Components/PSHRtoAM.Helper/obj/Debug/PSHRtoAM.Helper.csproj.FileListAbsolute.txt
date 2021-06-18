@@ -1,0 +1,12 @@
+C:\Project\ITHR\ITHR.BizTalk\DSG.PSHRtoAM-V1\PSHRtoAM.Helper\bin\Debug\PSHRtoAM.Helper.dll
+C:\Project\ITHR\ITHR.BizTalk\DSG.PSHRtoAM-V1\PSHRtoAM.Helper\bin\Debug\PSHRtoAM.Helper.pdb
+C:\Project\ITHR\ITHR.BizTalk\DSG.PSHRtoAM-V1\PSHRtoAM.Helper\obj\Debug\PSHRtoAM.Helper.csprojAssemblyReference.cache
+C:\Project\ITHR\ITHR.BizTalk\DSG.PSHRtoAM-V1\PSHRtoAM.Helper\obj\Debug\PSHRtoAM.Helper.csproj.CoreCompileInputs.cache
+C:\Project\ITHR\ITHR.BizTalk\DSG.PSHRtoAM-V1\PSHRtoAM.Helper\obj\Debug\PSHRtoAM.Helper.dll
+C:\Project\ITHR\ITHR.BizTalk\DSG.PSHRtoAM-V1\PSHRtoAM.Helper\obj\Debug\PSHRtoAM.Helper.pdb
+C:\Git\Dev\HR\PSHRtoAM\Components\PSHRtoAM.Helper\bin\Debug\PSHRtoAM.Helper.dll
+C:\Git\Dev\HR\PSHRtoAM\Components\PSHRtoAM.Helper\bin\Debug\PSHRtoAM.Helper.pdb
+C:\Git\Dev\HR\PSHRtoAM\Components\PSHRtoAM.Helper\obj\Debug\PSHRtoAM.Helper.csprojAssemblyReference.cache
+C:\Git\Dev\HR\PSHRtoAM\Components\PSHRtoAM.Helper\obj\Debug\PSHRtoAM.Helper.csproj.CoreCompileInputs.cache
+C:\Git\Dev\HR\PSHRtoAM\Components\PSHRtoAM.Helper\obj\Debug\PSHRtoAM.Helper.dll
+C:\Git\Dev\HR\PSHRtoAM\Components\PSHRtoAM.Helper\obj\Debug\PSHRtoAM.Helper.pdb

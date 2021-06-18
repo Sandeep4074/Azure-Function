@@ -1,0 +1,514 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workflows_PSHRtoAMTest_name": {
+      "defaultValue": "PSHRtoAMTest",
+      "type": "String"
+    },
+    "integrationAccounts_BizTalktoAzureMigration_externalid": {
+      "defaultValue": "/subscriptions/98f767bd-d0d7-4699-acab-0dd799ce240d/resourceGroups/ES-Apps-Admin/providers/Microsoft.Logic/integrationAccounts/BizTalktoAzureMigration",
+      "type": "String"
+    },
+    "connections_sql_1_externalid": {
+      "defaultValue": "/subscriptions/98f767bd-d0d7-4699-acab-0dd799ce240d/resourceGroups/ES-HR-Apps-Dev/providers/Microsoft.Web/connections/sql-1",
+      "type": "String"
+    },
+    "LogicAppLocation": {
+      "type": "string",
+      "minLength": 1,
+      "allowedValues": [
+        "[resourceGroup().location]",
+        "eastus"
+      ],
+      "defaultValue": "eastus"
+    },
+    "sql_1_Connection_Name": {
+      "type": "string",
+      "defaultValue": "sql-1"
+    },
+    "sql_1_Connection_DisplayName": {
+      "type": "string",
+      "defaultValue": "peoplesoftsqldev"
+    },
+    "sql_1_server": {
+      "type": "string",
+      "metadata": {
+        "description": "SQL server name"
+      }
+    },
+    "sql_1_database": {
+      "type": "string",
+      "metadata": {
+        "description": "SQL database name"
+      }
+    },
+    "sql_1_username": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Username credential"
+      }
+    },
+    "sql_1_password": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password credential"
+      }
+    },
+    "sql_1_encryptConnection": {
+      "type": "bool",
+      "metadata": {
+        "description": "Encrypt Connection"
+      }
+    },
+    "sql_1_privacySetting": {
+      "type": "string",
+      "metadata": {
+        "description": "Privacy Setting"
+      },
+      "allowedValues": [
+        "None",
+        "Private",
+        "Organizational",
+        "Public"
+      ]
+    },
+    "sql_1_sqlConnectionString": {
+      "type": "securestring",
+      "metadata": {
+        "description": "SQL Connection String"
+      }
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2017-07-01",
+      "name": "[parameters('workflows_PSHRtoAMTest_name')]",
+      "location": "[parameters('LogicAppLocation')]",
+      "properties": {
+        "state": "Enabled",
+        "integrationAccount": {
+          "id": "[parameters('integrationAccounts_BizTalktoAzureMigration_externalid')]"
+        },
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "actions": {
+            "Log_Failure": {
+              "type": "Scope",
+              "actions": {
+                "Response_Error_Details": {
+                  "type": "Response",
+                  "kind": "Http",
+                  "inputs": {
+                    "statusCode": 400,
+                    "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<ns0:reply xmlns:ns0=\"http://DSG.PSHRtoAM\">\n    <ns0:operations namespace=\"PublishSubscribe\" interface=\"PublishSubscribeSystem\">\n        <ns0:invoke opnum=\"1\" member=\"PingNode\">\n            <ns0:return type=\"string\">@{outputs('SPInvoke')}</ns0:return>\n        </ns0:invoke>\n    </ns0:operations>\n</ns0:reply>"
+                  },
+                  "runAfter": {}
+                }
+              },
+              "runAfter": {
+                "PeopleSoft_Request_Message_Process": [
+                  "Failed"
+                ]
+              }
+            },
+            "Log_TimeOut": {
+              "type": "Scope",
+              "actions": {
+                "Response_Timeout": {
+                  "type": "Response",
+                  "kind": "Http",
+                  "inputs": {
+                    "statusCode": 500,
+                    "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<ns0:reply xmlns:ns0=\"http://DSG.PSHRtoAM\">\n    <ns0:operations namespace=\"PublishSubscribe\" interface=\"PublishSubscribeSystem\">\n        <ns0:invoke opnum=\"1\" member=\"PingNode\">\n            <ns0:return type=\"number\">1</ns0:return>\n        </ns0:invoke>\n    </ns0:operations>\n</ns0:reply>"
+                  },
+                  "runAfter": {}
+                }
+              },
+              "runAfter": {
+                "PeopleSoft_Request_Message_Process": [
+                  "TimedOut"
+                ]
+              }
+            },
+            "PSReqtoReply": {
+              "type": "Xslt",
+              "inputs": {
+                "content": "@{triggerBody()}",
+                "integrationAccount": {
+                  "map": {
+                    "name": "mapMessageToReply"
+                  }
+                }
+              },
+              "runAfter": {},
+              "runtimeConfiguration": {
+                "secureData": {
+                  "properties": [
+                    "inputs",
+                    "outputs"
+                  ]
+                }
+              }
+            },
+            "PeopleSoft_Request_Message_Process": {
+              "type": "Scope",
+              "actions": {
+                "Check_Is_Msg_Emp_Data_else_Ping_Status": {
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "contains": [
+                          "@triggerBody()",
+                          "@parameters('PeoplesoftEmpMsgType')"
+                        ]
+                      }
+                    ]
+                  },
+                  "actions": {
+                    "PStoFIM_Inovke_SQL_Proc": {
+                      "type": "Scope",
+                      "actions": {
+                        "PSReqtoFImSQLProc": {
+                          "type": "Xslt",
+                          "inputs": {
+                            "content": "@{triggerBody()}",
+                            "integrationAccount": {
+                              "map": {
+                                "name": "PS_to_StorePSRecordReq"
+                              }
+                            },
+                            "transformOptions": "ApplyXsltOutputAttributes"
+                          },
+                          "runAfter": {},
+                          "runtimeConfiguration": {
+                            "secureData": {
+                              "properties": [
+                                "inputs",
+                                "outputs"
+                              ]
+                            }
+                          }
+                        },
+                        "Parse_JSON": {
+                          "type": "ParseJson",
+                          "inputs": {
+                            "content": "@json(xml(body('PSReqtoFImSQLProc')))",
+                            "schema": {
+                              "properties": {
+                                "ns0:p_StorePSRecord": {
+                                  "properties": {
+                                    "ns0:ACCT_CD": {
+                                      "type": "string"
+                                    },
+                                    "ns0:BIRTHDATE": {
+                                      "type": "string"
+                                    },
+                                    "ns0:BusinessUnit": {
+                                      "type": "string"
+                                    },
+                                    "ns0:DEPTID": {
+                                      "type": "string"
+                                    },
+                                    "ns0:DEPT_DESCR": {
+                                      "type": "string"
+                                    },
+                                    "ns0:DIVISION": {
+                                      "type": "string"
+                                    },
+                                    "ns0:DSG_DIVISION_DESCR": {
+                                      "type": "string"
+                                    },
+                                    "ns0:EMPLID": {
+                                      "type": "string"
+                                    },
+                                    "ns0:EMPL_STATUS": {
+                                      "type": "string"
+                                    },
+                                    "ns0:EMPL_TYPE": {
+                                      "type": "string"
+                                    },
+                                    "ns0:EXPECTED_END_DATE": {
+                                      "type": "string"
+                                    },
+                                    "ns0:FIRST_NAME": {
+                                      "type": "string"
+                                    },
+                                    "ns0:FLSA_STATUS": {
+                                      "type": "string"
+                                    },
+                                    "ns0:GRADE": {
+                                      "type": "string"
+                                    },
+                                    "ns0:JOBCODE": {
+                                      "type": "string"
+                                    },
+                                    "ns0:JOB_DESCR": {
+                                      "type": "string"
+                                    },
+                                    "ns0:LAST_NAME": {
+                                      "type": "string"
+                                    },
+                                    "ns0:LOCATION_DESCR": {
+                                      "type": "string"
+                                    },
+                                    "ns0:Location": {
+                                      "type": "string"
+                                    },
+                                    "ns0:MANAGER_ID": {
+                                      "type": "string"
+                                    },
+                                    "ns0:MIDDLE_NAME": {
+                                      "type": "string"
+                                    },
+                                    "ns0:NATIONAL_ID": {
+                                      "type": "string"
+                                    },
+                                    "ns0:PER_ORG": {
+                                      "type": "string"
+                                    },
+                                    "ns0:POSTAL": {
+                                      "type": "string"
+                                    },
+                                    "ns0:SAL_ADMIN_PLAN": {
+                                      "type": "string"
+                                    },
+                                    "ns0:START_DATE": {
+                                      "type": "string"
+                                    },
+                                    "ns0:Suffix": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "runAfter": {
+                            "PSReqtoFImSQLProc": [
+                              "Succeeded"
+                            ]
+                          },
+                          "runtimeConfiguration": {
+                            "secureData": {
+                              "properties": [
+                                "inputs"
+                              ]
+                            }
+                          },
+                          "trackedProperties": {
+                            "EmpID": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:EMPLID']"
+                          }
+                        },
+                        "Response_Success_Emp_Data": {
+                          "type": "Response",
+                          "kind": "Http",
+                          "inputs": {
+                            "statusCode": 200,
+                            "body": "@body('PSReqtoReply')"
+                          },
+                          "runAfter": {
+                            "SPInvoke": [
+                              "Succeeded"
+                            ]
+                          },
+                          "operationOptions": "Asynchronous",
+                          "runtimeConfiguration": {
+                            "secureData": {
+                              "properties": [
+                                "inputs"
+                              ]
+                            }
+                          }
+                        },
+                        "SPInvoke": {
+                          "type": "ApiConnection",
+                          "inputs": {
+                            "host": {
+                              "connection": {
+                                "name": "@parameters('$connections')['sql']['connectionId']"
+                              }
+                            },
+                            "method": "post",
+                            "body": {
+                              "DEPTID": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:DEPTID']",
+                              "DEPT_DESCR": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:DEPT_DESCR']",
+                              "EMPLID": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:EMPLID']",
+                              "FIRST_NAME": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:FIRST_NAME']",
+                              "MIDDLE_NAME": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:MIDDLE_NAME']",
+                              "LAST_NAME": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:LAST_NAME']",
+                              "JOB_DESCR": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:JOB_DESCR']",
+                              "BIRTHDATE": "@{body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:BIRTHDATE']}",
+                              "EMPL_STATUS": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:EMPL_STATUS']",
+                              "JOBCODE": "@{body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:JOBCODE']}",
+                              "NATIONAL_ID": "@{body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:NATIONAL_ID']}",
+                              "POSTAL": "@{body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:POSTAL']}",
+                              "EMPL_TYPE": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:EMPL_TYPE']",
+                              "ACCT_CD": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:ACCT_CD']",
+                              "Suffix": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:Suffix']",
+                              "Location": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:Location']",
+                              "BusinessUnit": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:BusinessUnit']",
+                              "PER_ORG": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:PER_ORG']",
+                              "START_DATE": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:START_DATE']",
+                              "EXPECTED_END_DATE": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:EXPECTED_END_DATE']",
+                              "MANAGER_ID": "@{body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:MANAGER_ID']}",
+                              "LOCATION_DESCR": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:LOCATION_DESCR']",
+                              "DIVISION": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:DIVISION']",
+                              "DSG_DIVISION_DESCR": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:DSG_DIVISION_DESCR']",
+                              "SAL_ADMIN_PLAN": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:SAL_ADMIN_PLAN']",
+                              "GRADE": "@{body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:GRADE']}",
+                              "FLSA_STATUS": "@body('Parse_JSON')?['ns0:p_StorePSRecord']?['ns0:FLSA_STATUS']"
+                            },
+                            "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('default'))},@{encodeURIComponent(encodeURIComponent('default'))}/procedures/@{encodeURIComponent(encodeURIComponent('[dbo].[p_StorePSRecord]'))}"
+                          },
+                          "runAfter": {
+                            "Parse_JSON": [
+                              "Succeeded"
+                            ]
+                          },
+                          "runtimeConfiguration": {
+                            "secureData": {
+                              "properties": [
+                                "inputs",
+                                "outputs"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "runAfter": {}
+                    }
+                  },
+                  "runAfter": {},
+                  "else": {
+                    "actions": {
+                      "Check_Is_Ping_Request": {
+                        "type": "If",
+                        "expression": {
+                          "and": [
+                            {
+                              "contains": [
+                                "@triggerBody()",
+                                "@parameters('PeoplesoftPingMsgType')"
+                              ]
+                            }
+                          ]
+                        },
+                        "actions": {
+                          "Response_Success_Ping_Status": {
+                            "type": "Response",
+                            "kind": "Http",
+                            "inputs": {
+                              "statusCode": 200,
+                              "body": "@triggerBody()"
+                            },
+                            "runAfter": {}
+                          }
+                        },
+                        "runAfter": {},
+                        "else": {
+                          "actions": {
+                            "Response_Error_Invalid_Msg": {
+                              "type": "Response",
+                              "kind": "Http",
+                              "inputs": {
+                                "statusCode": 400,
+                                "body": "@{triggerBody()} + \"Invalid Request Message and Failed\""
+                              },
+                              "runAfter": {}
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "runAfter": {
+                "PSReqtoReply": [
+                  "Succeeded"
+                ]
+              }
+            }
+          },
+          "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            },
+            "PeoplesoftEmpMsgType": {
+              "defaultValue": "DSG_POS_MSG",
+              "type": "String"
+            },
+            "PeoplesoftPingMsgType": {
+              "defaultValue": "DSG_PING_MSG",
+              "type": "String"
+            }
+          },
+          "triggers": {
+            "manual": {
+              "type": "Request",
+              "kind": "Http",
+              "inputs": {
+                "schema": {}
+              },
+              "runtimeConfiguration": {
+                "secureData": {
+                  "properties": [
+                    "inputs",
+                    "outputs"
+                  ]
+                }
+              }
+            }
+          },
+          "contentVersion": "1.0.0.0",
+          "outputs": {}
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "sql": {
+                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', parameters('LogicAppLocation'), '/managedApis/', 'sql')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('sql_1_Connection_Name'))]",
+                "connectionName": "[parameters('sql_1_Connection_Name')]"
+              }
+            }
+          }
+        }
+      },
+      "tags": {
+        "displayName": "LogicApp"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/connections', parameters('sql_1_Connection_Name'))]"
+      ]
+    },
+    {
+      "type": "MICROSOFT.WEB/CONNECTIONS",
+      "apiVersion": "2018-07-01-preview",
+      "name": "[parameters('sql_1_Connection_Name')]",
+      "location": "[parameters('LogicAppLocation')]",
+      "properties": {
+        "api": {
+          "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', parameters('LogicAppLocation'), '/managedApis/', 'sql')]"
+        },
+        "displayName": "[parameters('sql_1_Connection_DisplayName')]",
+        "parameterValues": {
+          "server": "[parameters('sql_1_server')]",
+          "database": "[parameters('sql_1_database')]",
+          "username": "[parameters('sql_1_username')]",
+          "password": "[parameters('sql_1_password')]",
+          "encryptConnection": "[parameters('sql_1_encryptConnection')]",
+          "privacySetting": "[parameters('sql_1_privacySetting')]",
+          "sqlConnectionString": "[parameters('sql_1_sqlConnectionString')]"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,418 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workflows_AssociateSynch_name": {
+      "defaultValue": "AssociateSynch",
+      "type": "String"
+    },
+    "integrationAccounts_BizTalktoAzureMigration_externalid": {
+      "defaultValue": "/subscriptions/98f767bd-d0d7-4699-acab-0dd799ce240d/resourceGroups/ES-HR-Logic-Apps/providers/Microsoft.Logic/integrationAccounts/BizTalktoAzureMigration",
+      "type": "String"
+    },
+    "connections_sql_4_externalid": {
+      "defaultValue": "/subscriptions/98f767bd-d0d7-4699-acab-0dd799ce240d/resourceGroups/ES-HR-Logic-Apps/providers/Microsoft.Web/connections/sql-4",
+      "type": "String"
+    },
+    "connections_webcontents_2_externalid": {
+      "defaultValue": "/subscriptions/98f767bd-d0d7-4699-acab-0dd799ce240d/resourceGroups/ES-HR-Logic-Apps/providers/Microsoft.Web/connections/webcontents-2",
+      "type": "String"
+    },
+    "LogicAppLocation": {
+      "type": "string",
+      "minLength": 1,
+      "allowedValues": [
+        "[resourceGroup().location]",
+        "eastus"
+      ],
+      "defaultValue": "eastus"
+    },
+    "webcontents_1_Connection_Name": {
+      "type": "string",
+      "defaultValue": "webcontents-2"
+    },
+    "webcontents_1_Connection_DisplayName": {
+      "type": "string",
+      "defaultValue": "https://myhruat.dcsg.com/PSIGW/PS81ListeningConnector"
+    },
+    "webcontents_1_baseResourceUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "Specify the base URL of the HTTP resources you want to connect to.  You can connect to any resources under this URL."
+      },
+      "defaultValue": "https://myhruat.dcsg.com/PSIGW/PS81ListeningConnector"
+    },
+    "webcontents_1_username": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Username credential"
+      }
+    },
+    "webcontents_1_password": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password credential"
+      }
+    },
+    "webcontents_1_authType": {
+      "type": "string",
+      "metadata": {
+        "description": "Authentication type to connect to your on-premise HTTP resource"
+      },
+      "defaultValue": "anonymous",
+      "allowedValues": [
+        "windows",
+        "basic",
+        "anonymous"
+      ]
+    },
+    "webcontents_1_privacySetting": {
+      "type": "string",
+      "metadata": {
+        "description": "Privacy Setting"
+      },
+      "allowedValues": [
+        "None",
+        "Private",
+        "Organizational",
+        "Public"
+      ]
+    },
+    "webcontents_1_gateway_id": {
+      "type": "string",
+      "defaultValue": "/subscriptions/98f767bd-d0d7-4699-acab-0dd799ce240d/resourceGroups/EnterpriseServices-Sandbox/providers/Microsoft.Web/connectionGateways/DSG-OPDG"
+    },
+    "sql_1_Connection_Name": {
+      "type": "string",
+      "defaultValue": "sql-4"
+    },
+    "sql_1_Connection_DisplayName": {
+      "type": "string",
+      "defaultValue": "opdg-on-prem"
+    },
+    "sql_1_server": {
+      "type": "string",
+      "metadata": {
+        "description": "SQL server name"
+      }
+    },
+    "sql_1_database": {
+      "type": "string",
+      "metadata": {
+        "description": "SQL database name"
+      }
+    },
+    "sql_1_username": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Username credential"
+      }
+    },
+    "sql_1_password": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password credential"
+      }
+    },
+    "sql_1_encryptConnection": {
+      "type": "bool",
+      "metadata": {
+        "description": "Encrypt Connection"
+      }
+    },
+    "sql_1_privacySetting": {
+      "type": "string",
+      "metadata": {
+        "description": "Privacy Setting"
+      },
+      "allowedValues": [
+        "None",
+        "Private",
+        "Organizational",
+        "Public"
+      ]
+    },
+    "sql_1_sqlConnectionString": {
+      "type": "securestring",
+      "metadata": {
+        "description": "SQL Connection String"
+      }
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2017-07-01",
+      "name": "[parameters('workflows_AssociateSynch_name')]",
+      "location": "[parameters('LogicAppLocation')]",
+      "properties": {
+        "state": "Enabled",
+        "integrationAccount": {
+          "id": "[parameters('integrationAccounts_BizTalktoAzureMigration_externalid')]"
+        },
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "actions": {
+            "Initialize_variable": {
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "HREndPointReply",
+                    "type": "string"
+                  }
+                ]
+              },
+              "runAfter": {}
+            },
+            "Scope_1": {
+              "type": "Scope",
+              "actions": {
+                "Condition": {
+                  "type": "If",
+                  "expression": {
+                    "and": [
+                      {
+                        "contains": [
+                          "@variables('HREndPointReply')",
+                          "<exception>"
+                        ]
+                      }
+                    ]
+                  },
+                  "actions": {
+                    "Response": {
+                      "type": "Response",
+                      "kind": "Http",
+                      "inputs": {
+                        "statusCode": 400,
+                        "body": "There ws an error calling the HR End point: @{variables('HREndPointReply')}"
+                      },
+                      "runAfter": {}
+                    }
+                  },
+                  "runAfter": {
+                    "Set_variable": [
+                      "Succeeded"
+                    ]
+                  },
+                  "else": {
+                    "actions": {
+                      "Success_Response": {
+                        "type": "Response",
+                        "kind": "Http",
+                        "inputs": {
+                          "statusCode": 200,
+                          "body": "Success"
+                        },
+                        "runAfter": {}
+                      }
+                    }
+                  }
+                },
+                "Execute_stored_procedure_(V2)": {
+                  "type": "ApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['sql']['connectionId']"
+                      }
+                    },
+                    "method": "post",
+                    "body": {
+                      "pEmplID": "Synch"
+                    },
+                    "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('default'))},@{encodeURIComponent(encodeURIComponent('default'))}/procedures/@{encodeURIComponent(encodeURIComponent('[dbo].[p_GetPubID]'))}"
+                  },
+                  "runAfter": {}
+                },
+                "Invoke_an_HTTP_request_2": {
+                  "type": "ApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['webcontents_1']['connectionId']"
+                      }
+                    },
+                    "method": "post",
+                    "body": {
+                      "method": "POST",
+                      "url": "https://myhruat.dcsg.com/PSIGW/PS81ListeningConnector",
+                      "body": "@{base64(body('Transform_XML'))}"
+                    },
+                    "path": "/codeless/InvokeHttp"
+                  },
+                  "runAfter": {
+                    "Transform_XML": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Set_variable": {
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "HREndPointReply",
+                    "value": "@{body('Invoke_an_HTTP_request_2')}"
+                  },
+                  "runAfter": {
+                    "Invoke_an_HTTP_request_2": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Transform_XML": {
+                  "type": "Xslt",
+                  "inputs": {
+                    "content": "@{triggerBody()}",
+                    "integrationAccount": {
+                      "map": {
+                        "name": "DiffToPS"
+                      }
+                    },
+                    "xsltParameters": {
+                      "FromNode": "DSG_POS_BTS2013_IN",
+                      "ToNode": "HR92U",
+                      "DBUniqueNo": "@{body('Execute_stored_procedure_(V2)')?['resultsets']}"
+                    }
+                  },
+                  "runAfter": {
+                    "Execute_stored_procedure_(V2)": [
+                      "Succeeded"
+                    ]
+                  }
+                }
+              },
+              "runAfter": {
+                "Initialize_variable": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Scope_2": {
+              "type": "Scope",
+              "actions": {
+                "Failure_Response": {
+                  "type": "Response",
+                  "kind": "Http",
+                  "inputs": {
+                    "statusCode": 400,
+                    "body": "Request failed. Please check after some time."
+                  },
+                  "runAfter": {}
+                }
+              },
+              "runAfter": {
+                "Scope_1": [
+                  "Failed"
+                ]
+              }
+            },
+            "Scope_3": {
+              "type": "Scope",
+              "actions": {
+                "Timeout_Response": {
+                  "type": "Response",
+                  "kind": "Http",
+                  "inputs": {
+                    "statusCode": 500,
+                    "body": "There was an error while running the app. Please check the log."
+                  },
+                  "runAfter": {}
+                }
+              },
+              "runAfter": {
+                "Scope_1": [
+                  "TimedOut"
+                ]
+              }
+            }
+          },
+          "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            }
+          },
+          "triggers": {
+            "manual": {
+              "type": "Request",
+              "kind": "Http",
+              "inputs": {
+                "schema": {}
+              }
+            }
+          },
+          "contentVersion": "1.0.0.0",
+          "outputs": {}
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "sql": {
+                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', parameters('LogicAppLocation'), '/managedApis/', 'sql')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('sql_1_Connection_Name'))]",
+                "connectionName": "[parameters('sql_1_Connection_Name')]"
+              },
+              "webcontents_1": {
+                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', parameters('LogicAppLocation'), '/managedApis/', 'webcontents')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('webcontents_1_Connection_Name'))]",
+                "connectionName": "[parameters('webcontents_1_Connection_Name')]"
+              }
+            }
+          }
+        }
+      },
+      "tags": {
+        "displayName": "LogicApp"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/connections', parameters('sql_1_Connection_Name'))]",
+        "[resourceId('Microsoft.Web/connections', parameters('webcontents_1_Connection_Name'))]"
+      ]
+    },
+    {
+      "type": "MICROSOFT.WEB/CONNECTIONS",
+      "apiVersion": "2018-07-01-preview",
+      "name": "[parameters('webcontents_1_Connection_Name')]",
+      "location": "[parameters('LogicAppLocation')]",
+      "properties": {
+        "api": {
+          "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', parameters('LogicAppLocation'), '/managedApis/', 'webcontents')]"
+        },
+        "displayName": "[parameters('webcontents_1_Connection_DisplayName')]",
+        "parameterValues": {
+          "baseResourceUrl": "[parameters('webcontents_1_baseResourceUrl')]",
+          "username": "[parameters('webcontents_1_username')]",
+          "password": "[parameters('webcontents_1_password')]",
+          "authType": "[parameters('webcontents_1_authType')]",
+          "privacySetting": "[parameters('webcontents_1_privacySetting')]",
+          "gateway": {
+            "id": "[parameters('webcontents_1_gateway_id')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "MICROSOFT.WEB/CONNECTIONS",
+      "apiVersion": "2018-07-01-preview",
+      "name": "[parameters('sql_1_Connection_Name')]",
+      "location": "[parameters('LogicAppLocation')]",
+      "properties": {
+        "api": {
+          "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', parameters('LogicAppLocation'), '/managedApis/', 'sql')]"
+        },
+        "displayName": "[parameters('sql_1_Connection_DisplayName')]",
+        "parameterValues": {
+          "server": "[parameters('sql_1_server')]",
+          "database": "[parameters('sql_1_database')]",
+          "username": "[parameters('sql_1_username')]",
+          "password": "[parameters('sql_1_password')]",
+          "encryptConnection": "[parameters('sql_1_encryptConnection')]",
+          "privacySetting": "[parameters('sql_1_privacySetting')]",
+          "sqlConnectionString": "[parameters('sql_1_sqlConnectionString')]"
+        }
+      }
+    }
+  ]
+}

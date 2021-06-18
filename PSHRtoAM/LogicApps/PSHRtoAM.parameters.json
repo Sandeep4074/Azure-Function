@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workflows_PSHRtoAMTest_name": {
+      "value": "PSHRtoAM"
+    },
+    "integrationAccounts_BizTalktoAzureMigration_externalid": {
+      "value": "/subscriptions/98f767bd-d0d7-4699-acab-0dd799ce240d/resourceGroups/ES-Apps-Admin/providers/Microsoft.Logic/integrationAccounts/BizTalktoAzureMigration"
+    },
+    "connections_sql_1_externalid": {
+      "value": "/subscriptions/98f767bd-d0d7-4699-acab-0dd799ce240d/resourceGroups/ES-HR-Apps-Dev/providers/Microsoft.Web/connections/sql-1"
+    },
+    "sql_1_privacySetting": {
+      "value": "None"
+    }
+  }
+}
