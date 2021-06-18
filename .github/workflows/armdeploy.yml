@@ -21,7 +21,7 @@ jobs:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
         resourceGroupName: ${{ secrets.AZURE_RG }}
         #path: ${GITHUB_WORKSPACE}/AssociateSync/Functions/
-        template: D:\a\Azure-Function\Azure-Function\AssociateSync\Functions\AssociateSync\Functions\azuredeploy.json
+        template: D:\a\Azure-Function\Azure-Function\AssociateSync\Functions\azuredeploy.json
         #parameters: storageAccountType=Standard_LRS
 
       # output containerName variable from template
