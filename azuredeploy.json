@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "webAppName": {
-            "defaultValue": "functionAppName",
+            "defaultValue": "github-deploy-HR-fn",
             "minLength": 2,
             "type": "String",
             "metadata": {
@@ -53,18 +53,18 @@
         }
     },
     "variables": {
-        "functionAppName": "daizquiegithubtest",
-        "hostingPlanName": "daizquiegithubtest",
+        "functionAppName": "github-deploy-HR-fn",
+        "hostingPlanName": "functionappserviceplan",
         "functionWorkerRuntime": "dotnet",
-        "storageAccountName": "vpxtbvwr2kj6qazfunctions",
+        "storageAccountName": "functionarmstr",
         "appServicePlanPortalName": "[concat('AppServicePlan-', parameters('webAppName'))]",
         "gitRepoReference": {
-            ".net": "https://github.com/davidms-tests/funcActions",
+            ".net": "https://github.com/sreenathuser/Azure-Function/AssociateSync/Functions",
             "node": "https://github.com/Azure-Samples/nodejs-docs-hello-world",
             "php": "https://github.com/Azure-Samples/php-docs-hello-world",
             "html": "https://github.com/Azure-Samples/html-docs-hello-world"
         },
-        "gitRepoUrl": "https://github.com/davidms-tests/funcActions",
+        "gitRepoUrl": "https://github.com/sreenathuser/Azure-Function/AssociateSync/Functions",
         "configReference": {
             ".net": {
                 "comments": ".Net app. No additional configuration needed."
@@ -85,7 +85,7 @@
             }
         }
     },
-    "resources": [
+	"resources": [
         {
             "type": "Microsoft.Web/sites",
             "apiVersion": "2020-06-01",
