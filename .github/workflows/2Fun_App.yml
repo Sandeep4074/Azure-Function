@@ -29,7 +29,7 @@ jobs:
       shell: pwsh
       run: |
         pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-        dotnet build --configuration Release --output ./AssociateSync/Functions/output
+        dotnet build --configuration Release --output ./output
         popd
 
     - name: 'Run Azure Functions Action'
@@ -38,6 +38,6 @@ jobs:
       with:
         app-name: '2-github-deploy-HR-fn'
         slot-name: 'production'
-        package: 'D:\a\Azure-Function\Azure-Function\AssociateSync\Functions\AssociateSync\Functions\output'
+        package: "${GITHUB_WORKSPACE}\output"
         publish-profile: ${{ secrets.Publish_Profile_2Fun_App }}
   
